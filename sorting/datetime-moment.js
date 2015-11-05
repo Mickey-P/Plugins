@@ -22,7 +22,15 @@
 
 (function($) {
 
-$.fn.dataTable.moment = function ( format, locale ) {
+$.fn.dataTable.moment = function ( format, locale, acceptableValues ) {
+	
+	// Null and empty values are acceptable by default
+	var defaultAcceptableValues = [ '', null ];
+	
+	acceptableValues = ( acceptableValues == undefined) ?
+		defaultAcceptableValues :
+		defaultAcceptableValues.concat(acceptableValues);
+	
 	var types = $.fn.dataTable.ext.type;
 
 	// Add type detection
@@ -31,9 +39,8 @@ $.fn.dataTable.moment = function ( format, locale ) {
 		if ( d && d.replace ) {
 			d = d.replace(/<.*?>/g, '');
 		}
-
-		// Null and empty values are acceptable
-		if ( d === '' || d === null ) {
+		
+		if ( acceptableValues.indexOf(d) ) {
 			return 'moment-'+format;
 		}
 
@@ -44,7 +51,7 @@ $.fn.dataTable.moment = function ( format, locale ) {
 
 	// Add sorting method - use an integer for the sorting
 	types.order[ 'moment-'+format+'-pre' ] = function ( d ) {
-		return d === '' || d === null ?
+		return ( acceptableValues.indexOf(d) ) ?
 			-Infinity :
 			parseInt( moment( d.replace ? d.replace(/<.*?>/g, '') : d, format, locale, true ).format( 'x' ), 10 );
 	};
